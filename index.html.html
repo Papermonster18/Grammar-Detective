@@ -1,0 +1,142 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Which Sentence is Correct?</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        .hidden { display: none; }
+        .question { margin: 20px 0; }
+        .option { margin: 10px 0; padding: 10px; border: 1px solid #ccc; cursor: pointer; }
+        .correct { background-color: #d4edda; border-color: #28a745; }
+        .incorrect { background-color: #f8d7da; border-color: #dc3545; }
+        button { margin-top: 20px; padding: 10px 20px; }
+    </style>
+</head>
+<body>
+    <h1>Which Sentence is Correct?</h1>
+    <div id="start">
+        <button onclick="startChallenge()">開始挑戰</button>
+    </div>
+    <div id="quiz" class="hidden">
+        <div id="question"></div>
+        <div id="options"></div>
+        <button id="nextBtn" class="hidden" onclick="nextQuestion()">繼續挑戰</button>
+        <button onclick="endChallenge()">結束挑戰</button>
+    </div>
+    <div id="result" class="hidden"></div>
+
+    <script>
+        const questions = [
+            { question: "Which sentence is correct?", options: ["She going to the store yesterday.", "She go to the store yesterday.", "She went to the store yesterday.", "She gone to the store yesterday."], answer: 2 },
+            { question: "Which sentence is correct?", options: ["He don’t like apples.", "He doesn’t like apples.", "He not like apples.", "He no like apples."], answer: 1 },
+            { question: "Which sentence is correct?", options: ["They was late.", "They were late.", "They be late.", "They is late."], answer: 1 },
+            { question: "Which sentence is correct?", options: ["I can to swim.", "I can swimming.", "I can swim.", "I can swam."], answer: 2 },
+            { question: "Which sentence is correct?", options: ["He has wrote a letter.", "He have written a letter.", "He has written a letter.", "He had write a letter."], answer: 2 },
+            { question: "Which sentence is correct?", options: ["We was at the park.", "We is at the park.", "We are at the park.", "We be at the park."], answer: 2 },
+            { question: "Which sentence is correct?", options: ["She didn’t went to school.", "She didn’t go to school.", "She don’t go to school.", "She not go to school."], answer: 1 },
+            { question: "Which sentence is correct?", options: ["Do he like pizza?", "Does he like pizza?", "Did he likes pizza?", "Is he like pizza?"], answer: 1 },
+            { question: "Which sentence is correct?", options: ["There is many books.", "There are many books.", "There be many books.", "There has many books."], answer: 1 },
+            { question: "Which sentence is correct?", options: ["She play piano well.", "She playing piano well.", "She plays piano well.", "She played piano now."], answer: 2 },
+            { question: "Which sentence is correct?", options: ["He has a lot of works to do.", "He has a lot of work to do.", "He have many work to do.", "He have a lot works."], answer: 1 },
+            { question: "Which sentence is correct?", options: ["I enjoy to read books.", "I enjoy read books.", "I enjoy reading books.", "I enjoy to reading books."], answer: 2 },
+            { question: "Which sentence is correct?", options: ["She speaks English very good.", "She speaks English very well.", "She speaks very good Englishly.", "She very well speaks English."], answer: 1 },
+            { question: "Which sentence is correct?", options: ["The news are interesting.", "The news is interesting.", "The news be interesting.", "The news were interesting."], answer: 1 },
+            { question: "Which sentence is correct?", options: ["We didn’t went to school.", "We didn’t go to school.", "We don’t went to school.", "We don’t go school."], answer: 1 },
+            { question: "Which sentence is correct?", options: ["Neither of the answers are correct.", "Neither of the answers were correct.", "Neither of the answers is correct.", "Neither of the answer is correct."], answer: 2 },
+            { question: "Which sentence is correct?", options: ["Let’s us go to the library.", "Let us go to the library.", "Let us to go to the library.", "Let’s going to the library."], answer: 1 },
+            { question: "Which sentence is correct?", options: ["This kind of books is rare.", "These kind of book are rare.", "These kinds of books are rare.", "This kinds of book is rare."], answer: 2 },
+            { question: "Which sentence is correct?", options: ["He explained me the problem.", "He explained the problem to me.", "He explained to me the problem me.", "He explained me to the problem."], answer: 1 },
+            { question: "Which sentence is correct?", options: ["It depends of the weather.", "It depends on the weather.", "It depends in the weather.", "It depends with the weather."], answer: 1 }
+        ];
+
+        let used = new Set();
+        let errors = [];
+        let totalAnswered = 0;
+        let correctAnswers = 0;
+        let currentIndex = -1;
+
+        function startChallenge() {
+            document.getElementById("start").classList.add("hidden");
+            document.getElementById("quiz").classList.remove("hidden");
+            nextQuestion();
+        }
+
+        function nextQuestion() {
+            document.getElementById("nextBtn").classList.add("hidden");
+            document.getElementById("options").innerHTML = "";
+
+            let remaining = questions.map((_, i) => i).filter(i => !used.has(i) || errors.includes(i));
+            if (remaining.length === 0) return endChallenge();
+
+            currentIndex = remaining[Math.floor(Math.random() * remaining.length)];
+            let q = questions[currentIndex];
+
+            document.getElementById("question").innerText = q.question;
+
+            q.options.forEach((option, i) => {
+                let div = document.createElement("div");
+                div.className = "option";
+                div.innerText = option;
+                div.onclick = () => selectAnswer(i);
+                document.getElementById("options").appendChild(div);
+            });
+        }
+
+        function selectAnswer(selected) {
+            const q = questions[currentIndex];
+            const optionsDiv = document.getElementById("options").children;
+            totalAnswered++;
+
+            for (let i = 0; i < optionsDiv.length; i++) {
+                optionsDiv[i].onclick = null;
+                optionsDiv[i].classList.add(i === q.answer ? "correct" : "incorrect");
+            }
+
+            if (selected === q.answer) {
+                used.add(currentIndex);
+                errors = errors.filter(i => i !== currentIndex);
+                correctAnswers++;
+            } else {
+                if (!errors.includes(currentIndex)) errors.push(currentIndex);
+            }
+
+            document.getElementById("nextBtn").classList.remove("hidden");
+        }
+
+        function endChallenge() {
+            document.getElementById("quiz").classList.add("hidden");
+            document.getElementById("result").classList.remove("hidden");
+            const resultHTML = `
+                <h2>答題結果</h2>
+                <p>總答題數：${totalAnswered}</p>
+                <p>答對題數：${correctAnswers}</p>
+                <button onclick="downloadErrors()">下載錯題記錄</button>
+            `;
+            document.getElementById("result").innerHTML = resultHTML;
+        }
+
+        function downloadErrors() {
+            let content = "Which Sentence is Correct? 錯題記錄\n\n";
+            errors.forEach(i => {
+                if (questions[i]) {
+                    let q = questions[i];
+                    content += `${q.question}\n`;
+                    q.options.forEach((opt, idx) => {
+                        const prefix = idx === q.answer ? "* " : "  ";
+                        content += `${prefix}${opt}\n`;
+                    });
+                    content += "\n";
+                }
+            });
+
+            const blob = new Blob([content], { type: "text/plain" });
+            const link = document.createElement("a");
+            link.href = URL.createObjectURL(blob);
+            link.download = "錯題記錄.txt";
+            link.click();
+        }
+    </script>
+</body>
+</html>
